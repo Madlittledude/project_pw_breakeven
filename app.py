@@ -57,8 +57,9 @@ include_in_calculation = {
  # 'van': (True, 'Single'),
 
 
-def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall):
+def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month):
     report = []
+    covered_single_items = set()  # Set to keep track of covered single items
 
     report.append("### Executive Financial Summary")
     report.append(f"* Total cost to break even over {months} months: **${total_cost_to_break:,.2f}**")
@@ -72,6 +73,8 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
         if month != last_month:
             report.append("------------")
             report.append(f"\n#### Month {month}:")
+            report.append(f"* Revenue this month: **${monthly_revenue_details[month-1]:,.2f}**")
+            report.append(f"* Doors hit this month: **{doors_hit_per_month[month-1]}**")
             last_month = month
 
         for item, cost in monthly_costs.items():
@@ -83,8 +86,9 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
                 report.append(f"* Not covered monthly '{item}' (Shortfall: **${shortfall:,.2f}**)")
 
         for expense in covered_expenses:
-            if expense[2] == month and expense[3] == 'single':
+            if expense[2] == month and expense[3] == 'single' and expense[0] not in covered_single_items:
                 report.append(f"* Covered single '{expense[0]}' costing **${expense[1]:,.2f}**")
+                covered_single_items.add(expense[0])  # Mark this single item as covered
 
     report.append("\n### Analysis & Recommendations")
     report.append("Recommendation: Increase the number of gigs or optimize cost structures to meet financial targets." if gig_shortfall > 0 else "Financial strategy is on track. Maintain current operations and continue monitoring expenses.")
