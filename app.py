@@ -23,7 +23,7 @@ class BreakEvenCalculator:
         number_of_yes = math.ceil((self.percentage_of_door_yes / 100) * self.number_of_doors_hit)
         monthly_revenue = number_of_yes * self.average_price_per_gig
         return monthly_revenue, number_of_yes
-
+    
     def calculate_costs_and_coverage(self):
         total_monthly_costs = sum(self.monthly_costs.values()) * self.months
         total_single_costs = sum([cost for item, cost in self.single_costs.items() if item not in self.covered_single_costs])
@@ -35,9 +35,9 @@ class BreakEvenCalculator:
         monthly_coverages = {month: [] for month in range(1, self.months + 1)}
     
         for month in range(1, self.months + 1):
-            current_month_revenue = monthly_revenue + remaining_revenue  # Start with new month's revenue plus remaining revenue from last month
+            current_month_revenue = monthly_revenue + remaining_revenue  # Include remaining revenue, which may be negative or positive.
     
-            # Handle monthly recurring costs
+            # First, handle monthly recurring costs
             for item, cost in self.monthly_costs.items():
                 if current_month_revenue >= cost:
                     covered_expenses.append((item, cost, month, 'monthly'))
@@ -46,7 +46,7 @@ class BreakEvenCalculator:
                 else:
                     monthly_coverages[month].append((item, 0, 'monthly (not covered)'))
     
-            # Handle single costs according to priority
+            # After monthly costs are handled, try to cover single costs if there's enough revenue left
             for item in self.priority_order:
                 if item in self.single_costs and item not in self.covered_single_costs:
                     cost = self.single_costs[item]
@@ -56,11 +56,13 @@ class BreakEvenCalculator:
                         current_month_revenue -= cost
                         self.covered_single_costs.add(item)
                     else:
+                        # If not enough revenue to cover a single cost, break the loop to ensure no further single costs are considered this month
                         monthly_coverages[month].append((item, 0, 'single (not covered)'))
+                        break  # Exit the loop if we can't afford a priority single cost
     
-            # Track remaining revenue to be rolled over to next month
+            # Record remaining revenue for the month, which could be rolled over to the next month
             monthly_coverages[month].append(('Remaining Revenue', current_month_revenue))
-            remaining_revenue = current_month_revenue
+            remaining_revenue = current_month_revenue  # Pass remaining revenue (or deficit) to the next month
     
         gigs_needed = math.ceil(total_cost_to_break / self.average_price_per_gig)
         gig_shortfall = gigs_needed - gigs_per_month * self.months
