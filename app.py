@@ -104,6 +104,7 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
 
 
 
+import math
 
 class BreakEvenCalculator:
     def __init__(self, cost_items, include_in_calculation, priority_order):
@@ -127,25 +128,31 @@ class BreakEvenCalculator:
         return number_of_yes * average_price_per_gig
 
     def simulate_month(self, month, monthly_revenue, monthly_costs, single_costs):
+        remaining_revenue = monthly_revenue
         covered_this_month = []
         shortfall_this_month = {}
+
+        # Handling monthly costs
         for item, cost in monthly_costs.items():
-            if monthly_revenue >= cost:
-                monthly_revenue -= cost
+            if remaining_revenue >= cost:
+                remaining_revenue -= cost
                 covered_this_month.append((item, cost, month, 'monthly'))
             else:
-                shortfall_this_month[item] = cost - monthly_revenue
-                monthly_revenue = 0
+                shortfall = cost - remaining_revenue
+                shortfall_this_month[item] = shortfall
+                remaining_revenue = 0
 
+        # Handling single costs
         for item in self.priority_order:
-            if item in single_costs and monthly_revenue >= single_costs[item] and (item, month) not in [expense[0] for expense in self.covered_expenses if expense[3] == 'single']:
-                monthly_revenue -= single_costs[item]
+            if item in single_costs and remaining_revenue >= single_costs[item] and item not in [expense[0] for expense in self.covered_expenses if expense[3] == 'single']:
+                remaining_revenue -= single_costs[item]
                 covered_this_month.append((item, single_costs[item], month, 'single'))
 
         self.covered_expenses.extend(covered_this_month)
         self.monthly_shortfall[month] = shortfall_this_month
-        self.monthly_revenue_details.append(monthly_revenue)
-        return monthly_revenue
+        self.monthly_revenue_details.append(remaining_revenue)
+
+        return remaining_revenue
 
     def calculate_break_even(self, months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes):
         monthly_costs = self.calculate_monthly_costs()
@@ -163,7 +170,6 @@ class BreakEvenCalculator:
         gig_shortfall = gigs_needed - sum(self.doors_hit_per_month)
 
         return total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, self.covered_expenses, months, monthly_costs, self.monthly_shortfall, self.monthly_revenue_details, self.doors_hit_per_month, remaining_revenue_each_month
-
 
 # Sorted priority order by highest cost
 priority_order = sorted(
