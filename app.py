@@ -204,9 +204,6 @@ def get_single_cost_items(include_in_calculation):
 
 
 
-import streamlit as st
-import math
-from your_calculator_module import BreakEvenCalculator  # Adjust the import statement based on your file organization
 
 def calculate_break_even(cost_items, include_in_calculation, priority_order, months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes):
     calculator = BreakEvenCalculator(cost_items, include_in_calculation, priority_order)
