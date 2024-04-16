@@ -2,6 +2,43 @@ import streamlit as st
 
 import math
 
+
+# Title for the application
+st.title('Break Even Calculator')
+
+# Sidebar inputs
+st.sidebar.header('Input Parameters')
+
+# Inputs for calculator initialization
+months = st.sidebar.number_input('Number of Months', min_value=1, value=12)
+average_price_per_gig = st.sidebar.number_input('Average Price Per Gig', min_value=1, value=300)
+number_of_doors_hit = st.sidebar.number_input('Number of Doors Hit', min_value=1, value=120)
+percentage_of_door_yes = st.sidebar.number_input('Percentage of Doors Yes', min_value=0, max_value=100, value=13)
+
+# Assuming cost items and other settings are entered as text input or JSON, you can use text_area for JSON input
+cost_items_input = st.sidebar.text_area("Cost Items (JSON format)", '''
+{
+    "gas": 150, "groceries": 350, "power_washer": 1500, "chemicals": 150, "insurance": 100,
+    "storage": 150, "surface_cleaner_attachment": 150, "x_jet_chem_applier": 160, "ladder": 300,
+    "gutter_wand": 80, "uniforms": 120, "gloves": 50, "shoes": 200, "hose": 120,
+    "laptop": 2200,  "rent": 2300
+}
+''')
+
+include_in_calculation_input = st.sidebar.text_area("Include in Calculation (JSON format)", '''
+{
+    "gas": [true, "Monthly"], "groceries": [true, "Monthly"], "power_washer": [true, "Single"],
+    "chemicals": [true, "Monthly"], "insurance": [true, "Monthly"], "storage": [true, "Single"],
+    "surface_cleaner_attachment": [true, "Single"], "x_jet_chem_applier": [true, "Single"],
+    "ladder": [true, "Single"], "gutter_wand": [true, "Single"], "uniforms": [true, "Single"],
+    "gloves": [true, "Single"], "shoes": [true, "Single"], "hose": [true, "Single"],
+    "laptop": [true, "Single"], "rent": [true, "Monthly"]
+}
+''')
+
+priority_order_input = st.sidebar.text_area("Priority Order (comma-separated list)", 
+'gas, rent, groceries, power_washer, hose, chemicals, storage, insurance, surface_cleaner_attachment, x_jet_chem_applier, ladder, gutter_wand, uniforms, gloves, shoes, laptop')
+
 class BreakEvenCalculator:
     def __init__(self, cost_items, include_in_calculation, priority_order, months=12, average_price_per_gig=300, number_of_doors_hit=120, percentage_of_door_yes=13):
         self.cost_items = cost_items
@@ -100,43 +137,6 @@ def print_financial_report(self):
 
     return "\n".join(report)
 
-
-
-# Title for the application
-st.title('Break Even Calculator')
-
-# Sidebar inputs
-st.sidebar.header('Input Parameters')
-
-# Inputs for calculator initialization
-months = st.sidebar.number_input('Number of Months', min_value=1, value=12)
-average_price_per_gig = st.sidebar.number_input('Average Price Per Gig', min_value=1, value=300)
-number_of_doors_hit = st.sidebar.number_input('Number of Doors Hit', min_value=1, value=120)
-percentage_of_door_yes = st.sidebar.number_input('Percentage of Doors Yes', min_value=0, max_value=100, value=13)
-
-# Assuming cost items and other settings are entered as text input or JSON, you can use text_area for JSON input
-cost_items_input = st.sidebar.text_area("Cost Items (JSON format)", '''
-{
-    "gas": 150, "groceries": 350, "power_washer": 1500, "chemicals": 150, "insurance": 100,
-    "storage": 150, "surface_cleaner_attachment": 150, "x_jet_chem_applier": 160, "ladder": 300,
-    "gutter_wand": 80, "uniforms": 120, "gloves": 50, "shoes": 200, "hose": 120,
-    "laptop": 2200,  "rent": 2300
-}
-''')
-
-include_in_calculation_input = st.sidebar.text_area("Include in Calculation (JSON format)", '''
-{
-    "gas": [true, "Monthly"], "groceries": [true, "Monthly"], "power_washer": [true, "Single"],
-    "chemicals": [true, "Monthly"], "insurance": [true, "Monthly"], "storage": [true, "Single"],
-    "surface_cleaner_attachment": [true, "Single"], "x_jet_chem_applier": [true, "Single"],
-    "ladder": [true, "Single"], "gutter_wand": [true, "Single"], "uniforms": [true, "Single"],
-    "gloves": [true, "Single"], "shoes": [true, "Single"], "hose": [true, "Single"],
-    "laptop": [true, "Single"], "rent": [true, "Monthly"]
-}
-''')
-
-priority_order_input = st.sidebar.text_area("Priority Order (comma-separated list)", 
-'gas, rent, groceries, power_washer, hose, chemicals, storage, insurance, surface_cleaner_attachment, x_jet_chem_applier, ladder, gutter_wand, uniforms, gloves, shoes, laptop')
 
 import json
 try:
