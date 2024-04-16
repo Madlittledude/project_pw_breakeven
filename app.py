@@ -59,7 +59,8 @@ include_in_calculation = {
 
 def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month):
     report = []
-    covered_single_items = set()  # Set to keep track of covered single items for the entire period
+    all_single_items = set()  # Set to keep track of all single items from the beginning
+    covered_single_items = set()  # Set to keep track of covered single items
 
     report.append("### Executive Financial Summary")
     report.append(f"* Total cost to break even over {months} months: **${total_cost_to_break:,.2f}**")
@@ -68,8 +69,6 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
     report.append(f"* Projected shortfall of gigs: **{gig_shortfall:,}** (additional gigs needed)" if gig_shortfall > 0 else "Sufficient gigs projected to meet or exceed break-even requirements.")
 
     report.append("\n### Detailed Expense Coverage Report")
-    covered_this_month = set()  # Set to keep track of single items covered in the current month only
-
     for month in range(1, months + 1):
         report.append("------------")
         report.append(f"\n#### Month {month}:")
@@ -84,13 +83,22 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
                 shortfall = monthly_shortfall.get(item, (0, ))[0]
                 report.append(f"* Not covered monthly '{item}' (Shortfall: **${shortfall:,.2f}**)")
 
-        # Clear the set for this month's single items at the start of each month
-        covered_this_month.clear()
+        # Handling single costs
+        for item, cost in monthly_costs.items():
+            if item not in all_single_items:
+                all_single_items.add(item)
+
         for expense in covered_expenses:
-            if expense[2] == month and expense[3] == 'single' and expense[0] not in covered_single_items:
-                report.append(f"* Covered single '{expense[0]}' costing **${expense[1]:,.2f}**")
+            if expense[2] == month and expense[3] == 'single':
                 covered_single_items.add(expense[0])
-                covered_this_month.add(expense[0])
+                report.append(f"* Covered single '{expense[0]}' costing **${expense[1]:,.2f}**")
+
+    # Remaining single items at the end of all months
+    remaining_single_items = all_single_items - covered_single_items
+    if remaining_single_items:
+        report.append("\n### Remaining Single Items to Purchase")
+        for item in remaining_single_items:
+            report.append(f"* {item} costing **${monthly_costs[item]:,.2f}** not yet covered")
 
     report.append("\n### Analysis & Recommendations")
     report.append("Recommendation: Increase the number of gigs or optimize cost structures to meet financial targets." if gig_shortfall > 0 else "Financial strategy is on track. Maintain current operations and continue monitoring expenses.")
