@@ -1,43 +1,10 @@
 import streamlit as st
-
+import json
 import math
 
-
-# Title for the application
-st.title('Break Even Calculator')
-
-# Sidebar inputs
-st.sidebar.header('Input Parameters')
-
-# Inputs for calculator initialization
-months = st.sidebar.number_input('Number of Months', min_value=1, value=12)
-average_price_per_gig = st.sidebar.number_input('Average Price Per Gig', min_value=1, value=300)
-number_of_doors_hit = st.sidebar.number_input('Number of Doors Hit', min_value=1, value=120)
-percentage_of_door_yes = st.sidebar.number_input('Percentage of Doors Yes', min_value=0, max_value=100, value=13)
-
-# Assuming cost items and other settings are entered as text input or JSON, you can use text_area for JSON input
-cost_items_input = st.sidebar.text_area("Cost Items (JSON format)", '''
-{
-    "gas": 150, "groceries": 350, "power_washer": 1500, "chemicals": 150, "insurance": 100,
-    "storage": 150, "surface_cleaner_attachment": 150, "x_jet_chem_applier": 160, "ladder": 300,
-    "gutter_wand": 80, "uniforms": 120, "gloves": 50, "shoes": 200, "hose": 120,
-    "laptop": 2200,  "rent": 2300
-}
-''')
-
-include_in_calculation_input = st.sidebar.text_area("Include in Calculation (JSON format)", '''
-{
-    "gas": [true, "Monthly"], "groceries": [true, "Monthly"], "power_washer": [true, "Single"],
-    "chemicals": [true, "Monthly"], "insurance": [true, "Monthly"], "storage": [true, "Single"],
-    "surface_cleaner_attachment": [true, "Single"], "x_jet_chem_applier": [true, "Single"],
-    "ladder": [true, "Single"], "gutter_wand": [true, "Single"], "uniforms": [true, "Single"],
-    "gloves": [true, "Single"], "shoes": [true, "Single"], "hose": [true, "Single"],
-    "laptop": [true, "Single"], "rent": [true, "Monthly"]
-}
-''')
-
-priority_order_input = st.sidebar.text_area("Priority Order (comma-separated list)", 
-'gas, rent, groceries, power_washer, hose, chemicals, storage, insurance, surface_cleaner_attachment, x_jet_chem_applier, ladder, gutter_wand, uniforms, gloves, shoes, laptop')
+import math
+import math
+import math
 
 class BreakEvenCalculator:
     def __init__(self, cost_items, include_in_calculation, priority_order, months=12, average_price_per_gig=300, number_of_doors_hit=120, percentage_of_door_yes=13):
@@ -98,72 +65,86 @@ class BreakEvenCalculator:
 
         return total_cost_to_break, monthly_revenue * self.months, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month
 
-def print_financial_report(self):
-    report = []
-    total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month = self.calculate_costs_and_coverage()
-    report.append(f"Total Cost to Break Even: {total_cost_to_break}")
-    report.append(f"Total Revenue: {total_revenue}")
-    report.append(f"Gigs Needed: {gigs_needed}")
-    report.append(f"Gig Shortfall: {gig_shortfall}")
+    def print_financial_report(self):
+        total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month = self.calculate_costs_and_coverage()
+        print("Total Cost to Break Even:", total_cost_to_break)
+        print("Total Revenue:", total_revenue)
+        print("Gigs Needed:", gigs_needed)
+        print("Gig Shortfall:", gig_shortfall)
 
-    previous_revenue_rollover = 0
-    for month in sorted(monthly_coverages):
-        report.append(f"\nMonth {month}")
-        revenue_for_month = self.calculate_revenue()[0]
-        report.append(f"Revenue This Month: {revenue_for_month}")
-        report.append(f"Rollover Addition: {previous_revenue_rollover}")
-        report.append(f"Revenue to Work with: {revenue_for_month + previous_revenue_rollover}")
-        report.append("----------")
-        report.append(f"Number of Gigs this Month: {gigs_per_month}")
-        total_monthly = 0
-        total_single = 0
-        for entry in monthly_coverages[month]:
-            if len(entry) == 3:
-                item, cost, type = entry
-                if type == 'monthly':
-                    total_monthly += cost
-                elif type == 'single':
-                    total_single += cost
-                report.append(f" - {item} (${cost}), {type}")
-            elif len(entry) == 2:
-                item, value = entry
-                if item == 'Remaining Revenue':
-                    previous_revenue_rollover = value
-                    report.append(f"{item}: ${value}")
+        previous_revenue_rollover = 0
+        for month in sorted(monthly_coverages):
+            print("\nMonth", month)
+            revenue_for_month = self.calculate_revenue()[0]
+            print("Revenue This Month:", revenue_for_month)
+            print("Rollover Addition:", previous_revenue_rollover)
+            print("Revenue to Work with:", revenue_for_month + previous_revenue_rollover)
+            print("----------")
+            print(f"Number of Gigs this Month: {gigs_per_month}")
+            total_monthly = 0
+            total_single = 0
+            for entry in monthly_coverages[month]:
+                if len(entry) == 3:
+                    item, cost, type = entry
+                    if type == 'monthly':
+                        total_monthly += cost
+                    elif type == 'single':
+                        total_single += cost
+                    print(f" - {item} (${cost}), {type}")
+                elif len(entry) == 2:
+                    item, value = entry
+                    if item == 'Remaining Revenue':
+                        previous_revenue_rollover = value  # Update rollover for next month
+                        print(f"{item}: ${value}")
 
-        report.append(f"Total Costs Covered: ${total_monthly + total_single}")
-        report.append(f"\tTotal Monthly Costs Covered: ${total_monthly}")
-        report.append(f"\tTotal Single Costs Covered: ${total_single}")
-
-    return "\n".join(report)
+            print(f"Total Costs Covered: ${total_monthly + total_single}")
+            print(f"\tTotal Monthly Costs Covered: ${total_monthly}")
+            print(f"\tTotal Single Costs Covered: ${total_single}")
 
 
-import json
-try:
-    cost_items = json.loads(cost_items_input)
-    include_in_calculation = json.loads(include_in_calculation_input)
-    priority_order = [item.strip() for item in priority_order_input.split(',')]
-except json.JSONDecodeError:
-    st.error('Invalid JSON input')
-    st.stop()
 
-# Button to run the calculation
-if st.button('Run Calculation'):
-    # Initialize the calculator with the inputs
-    calculator = BreakEvenCalculator(
-        cost_items, 
-        include_in_calculation, 
-        priority_order, 
-        months, 
-        average_price_per_gig, 
-        number_of_doors_hit, 
-        percentage_of_door_yes
-    )
-    
-    # Run the financial report and capture output
-    report_output = calculator.print_financial_report()
-    # Display the report in Streamlit
-    st.text(report_output)
+# Example usage:
+cost_items = {
+    'gas': 150, 'groceries': 350, 'power_washer': 1500, 'chemicals': 150, 'insurance': 100,
+    'storage': 150, 'surface_cleaner_attachment': 150, 'x_jet_chem_applier': 160, 'ladder': 300,
+    'gutter_wand': 80, 'uniforms': 120, 'gloves': 50, 'shoes': 200, 'hose': 120,
+    'laptop': 2200,  'rent': 2300, 
+}
+
+include_in_calculation = {
+    'gas': (True, 'Monthly'), 'groceries': (True, 'Monthly'), 'power_washer': (True, 'Single'),
+    'chemicals': (True, 'Monthly'), 'insurance': (True, 'Monthly'), 'storage': (True, 'Single'),
+    'surface_cleaner_attachment': (True, 'Single'), 'x_jet_chem_applier': (True, 'Single'),
+    'ladder': (True, 'Single'), 'gutter_wand': (True, 'Single'), 'uniforms': (True, 'Single'),
+    'gloves': (True, 'Single'), 'shoes': (True, 'Single'), 'hose': (True, 'Single'),
+    'laptop': (True, 'Single'), 'rent': (True, 'Monthly'),
+}
+
+priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose', 'chemicals', 'storage', 'insurance', 'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes', 'laptop']
 
 
-   
+
+# Streamlit application start
+st.title('Break-Even Calculator App')
+
+# User inputs for the calculator parameters
+months = st.slider("Select number of months:", min_value=1, max_value=24, value=12)
+average_price_per_gig = st.slider("Average price per gig ($):", min_value=100, max_value=1000, value=300)
+number_of_doors_hit = st.slider("Number of doors to hit:", min_value=50, max_value=500, value=120)
+percentage_of_door_yes = st.slider("Percentage of door yes (%):", min_value=1, max_value=100, value=13)
+
+# JSON input for costs and inclusion in calculation
+cost_items_input = st.text_area("Enter cost items in JSON format:", value=json.dumps(cost_items, indent=4))
+include_in_calculation_input = st.text_area("Enter items to include in calculation in JSON format:", value=json.dumps(include_in_calculation, indent=4))
+
+# Convert JSON input to Python dictionary
+cost_items = json.loads(cost_items_input)
+include_in_calculation = json.loads(include_in_calculation_input)
+
+# Initialize the calculator with the user input
+calculator = BreakEvenCalculator(cost_items, include_in_calculation, priority_order, months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes)
+
+# Display the financial report in a text box
+if st.button('Calculate Break-Even'):
+    report = calculator.get_financial_report()
+    st.text_area("Financial Report:", value=json.dumps(report, indent=4), height=300)
