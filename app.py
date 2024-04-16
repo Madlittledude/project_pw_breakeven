@@ -160,5 +160,9 @@ if st.button('Run Calculation'):
         percentage_of_door_yes
     )
     
-    # Run the financial report
-    calculator.print_financial_report()
+    # Run the financial report and capture output
+    report_output = calculator.print_financial_report()
+    # Display the report in Streamlit
+    st.text(report_output)
+
+   
