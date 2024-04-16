@@ -181,7 +181,7 @@ def get_single_cost_items(include_in_calculation):
 
 def app():
     priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose','chemicals','storage','insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop']
- # 'car', 'van'
+#, 'car', 'van'
     st.title('Financial Break-Even Analysis Tool')
 
     # Configuration for cost items
@@ -201,19 +201,27 @@ def app():
     yield_percent = st.number_input('Yield Percent', value=13, min_value=0, max_value=100)
     estimated_average_price_per_gig = st.number_input('Estimated Average Price per Gig', value=300, min_value=0)
 
+    # Calculate doors yielded
+    doors_yielded = math.ceil(doors * (yield_percent / 100))
+    st.write(f'Number of doors yielded: {doors_yielded}')  # Displaying the number of doors that yielded
+
     if st.button('Calculate Break Even'):
         results = calculate_break_even(modified_cost_items, include_in_calculation, selected_priority_order, month_scope, estimated_average_price_per_gig, doors, yield_percent)
         if results:
             report = print_financial_report(*results)
             st.markdown(report, unsafe_allow_html=True)
+            # Verify clients count
+            st.write(f"Based on the calculations, you will have {doors_yielded * month_scope} clients over {month_scope} months.")
         else:
             st.error("Error in calculation.")
-
 
     # Display history of runs
     if 'history' in st.session_state and st.session_state['history']:
         run = st.selectbox('Select a run to view results:', range(len(st.session_state['history'])), format_func=lambda x: f"Run {x + 1}")
         st.json(st.session_state['history'][run])  # Display the results as JSON for clarity
+
+if __name__ == "__main__":
+    app()
 
 if __name__ == "__main__":
     app()
