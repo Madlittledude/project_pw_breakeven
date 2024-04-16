@@ -30,45 +30,43 @@ class BreakEvenCalculator:
         total_cost_to_break = total_monthly_costs + total_single_costs
     
         monthly_revenue, gigs_per_month = self.calculate_revenue()
-        remaining_revenue = 0  # Start with no remaining revenue from previous months.
+        remaining_revenue = 0
         covered_expenses = []
         monthly_coverages = {month: [] for month in range(1, self.months + 1)}
     
         for month in range(1, self.months + 1):
-            current_month_revenue = monthly_revenue + remaining_revenue  # Include remaining revenue, which may be negative.
+            current_month_revenue = monthly_revenue + remaining_revenue  # Start with new month's revenue plus remaining revenue from last month
     
-            # Record monthly operations for recurring costs
+            # Handle monthly recurring costs
             for item, cost in self.monthly_costs.items():
                 if current_month_revenue >= cost:
                     covered_expenses.append((item, cost, month, 'monthly'))
                     monthly_coverages[month].append((item, cost, 'monthly'))
                     current_month_revenue -= cost
                 else:
-                    # Not enough revenue to cover this cost, mark the deficit
-                    monthly_coverages[month].append((item, -cost, 'monthly (deficit)'))
+                    monthly_coverages[month].append((item, 0, 'monthly (not covered)'))
     
-            # After monthly costs are handled, try to cover single costs if there's enough revenue left
+            # Handle single costs according to priority
             for item in self.priority_order:
                 if item in self.single_costs and item not in self.covered_single_costs:
-                    if current_month_revenue >= self.single_costs[item]:
-                        covered_expenses.append((item, self.single_costs[item], month, 'single'))
-                        monthly_coverages[month].append((item, self.single_costs[item], 'single'))
-                        current_month_revenue -= self.single_costs[item]
+                    cost = self.single_costs[item]
+                    if current_month_revenue >= cost:
+                        covered_expenses.append((item, cost, month, 'single'))
+                        monthly_coverages[month].append((item, cost, 'single'))
+                        current_month_revenue -= cost
                         self.covered_single_costs.add(item)
                     else:
-                        # Not enough revenue to cover single cost, skip it
                         monthly_coverages[month].append((item, 0, 'single (not covered)'))
     
-            # Record remaining revenue for the month, which could be rolled over to the next month
+            # Track remaining revenue to be rolled over to next month
             monthly_coverages[month].append(('Remaining Revenue', current_month_revenue))
-            remaining_revenue = current_month_revenue  # Update remaining revenue for the next month
+            remaining_revenue = current_month_revenue
     
         gigs_needed = math.ceil(total_cost_to_break / self.average_price_per_gig)
         gig_shortfall = gigs_needed - gigs_per_month * self.months
     
         return total_cost_to_break, monthly_revenue * self.months, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month
-    
-    
+
             
     def get_financial_report(self):
         report = []
@@ -130,7 +128,7 @@ include_in_calculation = {
     'laptop': (True, 'Single'), 'rent': (True, 'Monthly'),
 }
 
-priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose', 'chemicals', 'storage', 'insurance', 'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes', 'laptop']
+priority_order = ['power_washer', 'hose', 'chemicals', 'storage', 'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes', 'laptop']
 
 
 
