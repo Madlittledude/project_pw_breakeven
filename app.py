@@ -180,7 +180,7 @@ def get_single_cost_items(include_in_calculation):
 
 
 def app():
-    priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose', 'chemicals', 'storage', 'insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop', 'car', 'van']
+    priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose', 'chemicals', 'storage', 'insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop']
 
     st.title('Financial Break-Even Analysis Tool')
 
@@ -188,15 +188,14 @@ def app():
     st.sidebar.header('Cost Items Configuration')
     modified_cost_items = {}
     for idx, (item, cost) in enumerate(cost_items.items()):
-        # Using a unique key for each widget
-        widget_key = f"cost_{item}_{idx}"
+        widget_key = f"cost_{item}_{idx}"  # Ensure unique widget keys
         modified_cost_items[item] = st.sidebar.number_input(f'Cost for {item}', value=cost, min_value=0, key=widget_key)
-
 
     # Configuration for priority order
     st.sidebar.header('Adjust Priority Order')
     all_items = list(modified_cost_items.keys())
-    selected_priority_order = st.sidebar.multiselect('Set Priority Order (top to bottom):', options=all_items, default=priority_order)
+    valid_priority_order = [item for item in priority_order if item in all_items]  # Validate default values
+    selected_priority_order = st.sidebar.multiselect('Set Priority Order (top to bottom):', options=all_items, default=valid_priority_order)
 
     # Main configuration inputs
     month_scope = st.number_input('Months Scope', value=12, min_value=1)
@@ -209,8 +208,10 @@ def app():
     st.write(f'Number of doors yielded: {doors_yielded}')  # Displaying the number of doors that yielded
 
     if st.button('Calculate Break Even'):
+        # Ensure that the calculate_break_even function is defined or imported appropriately
         results = calculate_break_even(modified_cost_items, include_in_calculation, selected_priority_order, month_scope, estimated_average_price_per_gig, doors, yield_percent)
         if results:
+            # Ensure that the print_financial_report function is defined or imported appropriately
             report = print_financial_report(*results)
             st.markdown(report, unsafe_allow_html=True)
             # Verify clients count
