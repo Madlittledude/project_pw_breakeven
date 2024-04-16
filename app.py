@@ -103,8 +103,14 @@ def calculate_break_even(cost_items, include_in_calculation, priority_order, mon
         monthly_costs = {item: cost_items[item] for item, (included, frequency) in include_in_calculation.items() if included and frequency == 'Monthly'}
         single_costs = {item: cost_items[item] for item in priority_order if item in cost_items and include_in_calculation[item][0] and include_in_calculation[item][1] == 'Single'}
 
+        monthly_revenue_details = []
+        doors_hit_per_month = []
         number_of_yes = math.ceil((percentage_of_door_yes / 100) * number_of_doors_hit)
         monthly_revenue = number_of_yes * average_price_per_gig
+
+        for month in range(1, months + 1):
+            monthly_revenue_details.append(monthly_revenue)
+            doors_hit_per_month.append(number_of_yes)  # Assuming this is the number of doors hit that resulted in yes per month
 
         total_monthly_costs = sum(monthly_costs.values()) * months
         total_single_costs = sum(single_costs.values())
@@ -137,11 +143,10 @@ def calculate_break_even(cost_items, include_in_calculation, priority_order, mon
         gigs_needed = math.ceil(total_cost_to_break / average_price_per_gig)
         gig_shortfall = gigs_needed - number_of_yes * months
 
-        return total_cost_to_break, monthly_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall
+        return total_cost_to_break, monthly_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month
     except Exception as e:
         st.error(f"Failed to calculate: {str(e)}")
-        return 0, 0, 0, 0, [], months, {}, {}
-
+        return 0, 0, 0, 0, [], months, {}, {}, [], []
 
 
 # Sorted priority order by highest cost
