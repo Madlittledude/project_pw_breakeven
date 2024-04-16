@@ -109,56 +109,37 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
 
 
 def calculate_break_even(cost_items, include_in_calculation, priority_order, months=1, average_price_per_gig=300, number_of_doors_hit=120, percentage_of_door_yes=13):
-    try:
-        monthly_costs = {item: cost_items[item] for item, (included, frequency) in include_in_calculation.items() if included and frequency == 'Monthly'}
-        single_costs = {item: cost_items[item] for item in priority_order if item in cost_items and include_in_calculation[item][0] and include_in_calculation[item][1] == 'Single'}
+    monthly_revenue_details = []
+    doors_hit_per_month = []
+    remaining_revenue_each_month = []
+    number_of_yes = math.ceil((percentage_of_door_yes / 100) * number_of_doors_hit)
+    monthly_revenue = number_of_yes * average_price_per_gig
 
-        monthly_revenue_details = []
-        doors_hit_per_month = []
-        remaining_revenue_each_month = []
-        number_of_yes = math.ceil((percentage_of_door_yes / 100) * number_of_doors_hit)
-        monthly_revenue = number_of_yes * average_price_per_gig
+    total_monthly_costs = 0
+    covered_expenses = []
+    monthly_shortfall = {}
 
-        for month in range(1, months + 1):
-            monthly_revenue_details.append(monthly_revenue)
-            doors_hit_per_month.append(number_of_yes)
+    for month in range(1, months + 1):
+        current_month_revenue = monthly_revenue
+        month_expenses = 0  # Reset monthly expenses tracker
 
-        total_monthly_costs = sum(monthly_costs.values()) * months
-        total_single_costs = sum(single_costs.values())
-        total_cost_to_break = total_monthly_costs + total_single_costs
+        for item, cost in monthly_costs.items():
+            if current_month_revenue >= cost:
+                covered_expenses.append((item, cost, month, 'monthly'))
+                current_month_revenue -= cost
+                month_expenses += cost  # Add to monthly expenses tracker
+            else:
+                shortfall = cost - current_month_revenue
+                monthly_shortfall[item] = (shortfall, month)
+                current_month_revenue = 0  # Allocate all remaining revenue to this cost
 
-        remaining_revenue = 0
-        covered_expenses = []
-        monthly_shortfall = {}
+        remaining_revenue_each_month.append(current_month_revenue)
+        print(f"Month {month}: Total Expenses = ${month_expenses:.2f}, Remaining Revenue = ${current_month_revenue:.2f}")  # Debug output
 
-        for month in range(1, months + 1):
-            current_month_revenue = monthly_revenue + remaining_revenue
+    # Additional code as needed
 
-            for item, cost in monthly_costs.items():
-                if current_month_revenue >= cost:
-                    covered_expenses.append((item, cost, month, 'monthly'))
-                    current_month_revenue -= cost
-                else:
-                    shortfall = cost - current_month_revenue
-                    monthly_shortfall[item] = (shortfall, month)
-                    current_month_revenue = 0
+    return # appropriate return values
 
-            if not monthly_shortfall and current_month_revenue > 0:
-                for item in priority_order:
-                    if item in single_costs and current_month_revenue >= single_costs[item]:
-                        covered_expenses.append((item, single_costs[item], month, 'single'))
-                        current_month_revenue -= single_costs[item]
-
-            remaining_revenue = current_month_revenue
-            remaining_revenue_each_month.append(remaining_revenue)  # Add the remaining revenue to the list
-
-        gigs_needed = math.ceil(total_cost_to_break / average_price_per_gig)
-        gig_shortfall = gigs_needed - number_of_yes * months
-
-        return total_cost_to_break, monthly_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month, remaining_revenue_each_month
-    except Exception as e:
-        st.error(f"Failed to calculate: {str(e)}")
-        return 0, 0, 0, 0, [], months, {}, {}, [], [], []
 
 
 # Sorted priority order by highest cost
