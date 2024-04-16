@@ -12,10 +12,9 @@ class BreakEvenCalculator:
         self.average_price_per_gig = average_price_per_gig
         self.number_of_doors_hit = number_of_doors_hit
         self.percentage_of_door_yes = percentage_of_door_yes
-        self.monthly_growth_rate = monthly_growth_rate  # Growth rate per month
+        self.monthly_growth_rate = monthly_growth_rate / 100  # Convert percentage to decimal
         self.initialize_costs()
 
-    
     def initialize_costs(self):
         self.monthly_costs = {item: self.cost_items[item] for item, (included, frequency) in self.include_in_calculation.items() if included and frequency == 'Monthly'}
         self.single_costs = {item: self.cost_items[item] for item in self.priority_order if item in self.cost_items and self.include_in_calculation[item][0] and self.include_in_calculation[item][1] == 'Single'}
@@ -35,7 +34,6 @@ class BreakEvenCalculator:
             
         return revenues, gigs_per_month
 
-    
     def calculate_costs_and_coverage(self):
         total_monthly_costs = sum(self.monthly_costs.values()) * self.months
         total_single_costs = sum([cost for item, cost in self.single_costs.items() if item not in self.covered_single_costs])
@@ -62,7 +60,7 @@ class BreakEvenCalculator:
                 else:
                     # Not enough revenue to cover this cost
                     deficit = cost - current_month_revenue
-                    current_month_revenue -= cost  # This will be negative or zero
+                    current_month_revenue = 0  # Update to zero since we're in deficit
                     monthly_coverages[month].append((item, cost - deficit, 'monthly (partial)'))
                     rolled_over_deficits += deficit  # Add remaining cost to the rolled over deficits
     
@@ -84,13 +82,14 @@ class BreakEvenCalculator:
             # Record remaining revenue for the month
             monthly_coverages[month].append(('Remaining Revenue', current_month_revenue))
             remaining_revenue = current_month_revenue  # Remaining revenue for the next month
+            rolled_over_deficits = 0  # Reset deficits for the next month
     
         gigs_needed = math.ceil(total_cost_to_break / self.average_price_per_gig)
-        gig_shortfall = gigs_needed - gigs_per_month * self.months
+        total_gigs = sum(gigs_per_month_list)
+        gig_shortfall = gigs_needed - total_gigs
     
-        return total_cost_to_break, monthly_revenue * self.months, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month
+        return total_cost_to_break, sum(monthly_revenues), gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month_list
 
-            
     def get_financial_report(self):
         report = []
         total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month = self.calculate_costs_and_coverage()
@@ -110,7 +109,7 @@ class BreakEvenCalculator:
             report.append(f"Rollover Addition: {previous_revenue_rollover:,.2f}")
             report.append(f"Revenue to Work with: {revenue_for_month + previous_revenue_rollover:,.2f}\n")
             
-            report.append(f"Number of Gigs this Month: {gigs_per_month:,}")
+            report.append(f"Number of Gigs this Month: {gigs_per_month[month-1]:,}")
             total_monthly = 0
             total_single = 0
             for entry in monthly_coverages[month]:
@@ -134,7 +133,6 @@ class BreakEvenCalculator:
             report.append("----------")
     
         return "\n".join(report)
-
 
 
 # Example usage:
