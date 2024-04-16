@@ -105,19 +105,21 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
 
 
 
-
-
-import math
-
 class BreakEvenCalculator:
     def __init__(self, cost_items, include_in_calculation, priority_order):
         self.cost_items = cost_items
         self.include_in_calculation = include_in_calculation
         self.priority_order = priority_order
-        self.covered_expenses = []  # Track covered expenses
-        self.monthly_shortfall = {}  # Track shortfalls
-        self.monthly_revenue_details = []  # Revenue per month
-        self.doors_hit_per_month = []  # Doors hit per month
+        self.covered_expenses = []
+        self.monthly_shortfall = {}
+        self.monthly_revenue_details = []
+        self.doors_hit_per_month = []
+
+    def calculate_monthly_costs(self):
+        return {item: self.cost_items[item] for item in self.cost_items if self.include_in_calculation[item][0] and self.include_in_calculation[item][1] == 'Monthly'}
+
+    def calculate_single_costs(self):
+        return {item: self.cost_items[item] for item in self.priority_order if item in self.cost_items and self.include_in_calculation[item][0] and self.include_in_calculation[item][1] == 'Single'}
 
     def calculate_monthly_revenue(self, number_of_doors_hit, percentage_of_door_yes, average_price_per_gig):
         number_of_yes = math.ceil((percentage_of_door_yes / 100) * number_of_doors_hit)
@@ -136,7 +138,7 @@ class BreakEvenCalculator:
                 monthly_revenue = 0
 
         for item in self.priority_order:
-            if item in single_costs and monthly_revenue >= single_costs[item] and (item, month) not in self.covered_expenses:
+            if item in single_costs and monthly_revenue >= single_costs[item] and (item, month) not in [expense[0] for expense in self.covered_expenses if expense[3] == 'single']:
                 monthly_revenue -= single_costs[item]
                 covered_this_month.append((item, single_costs[item], month, 'single'))
 
@@ -161,8 +163,6 @@ class BreakEvenCalculator:
         gig_shortfall = gigs_needed - sum(self.doors_hit_per_month)
 
         return total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, self.covered_expenses, months, monthly_costs, self.monthly_shortfall, self.monthly_revenue_details, self.doors_hit_per_month, remaining_revenue_each_month
-
-
 
 
 # Sorted priority order by highest cost
