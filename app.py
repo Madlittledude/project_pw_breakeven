@@ -107,7 +107,7 @@ class BreakEvenCalculator:
                         total_monthly += cost
                     elif type == 'single':
                         total_single += cost
-                    report.append(f" - {item} (${cost:,.2f}), {type}")
+                    report.append(f"\t - {item} (${cost:,.2f}), {type}")
                 elif len(entry) == 2:
                     item, value = entry
                     if item == 'Remaining Revenue':
