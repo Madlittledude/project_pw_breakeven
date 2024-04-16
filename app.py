@@ -104,6 +104,7 @@ class BreakEvenCalculator:
                     item, value = entry
                     if item == 'Remaining Revenue':
                         previous_revenue_rollover = value
+                        report.append('\n')
                         report.append(f"{item}: ${value:,.2f}")
     
             report.append(f"\nTotal Costs Covered: ${total_monthly + total_single:,.2f}")
