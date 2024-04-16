@@ -64,41 +64,44 @@ class BreakEvenCalculator:
 
         return total_cost_to_break, monthly_revenue * self.months, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month
 
-    def print_financial_report(self):
-        total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month = self.calculate_costs_and_coverage()
-        print("Total Cost to Break Even:", total_cost_to_break)
-        print("Total Revenue:", total_revenue)
-        print("Gigs Needed:", gigs_needed)
-        print("Gig Shortfall:", gig_shortfall)
+def print_financial_report(self):
+    report = []
+    total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month = self.calculate_costs_and_coverage()
+    report.append(f"Total Cost to Break Even: {total_cost_to_break}")
+    report.append(f"Total Revenue: {total_revenue}")
+    report.append(f"Gigs Needed: {gigs_needed}")
+    report.append(f"Gig Shortfall: {gig_shortfall}")
 
-        previous_revenue_rollover = 0
-        for month in sorted(monthly_coverages):
-            print("\nMonth", month)
-            revenue_for_month = self.calculate_revenue()[0]
-            print("Revenue This Month:", revenue_for_month)
-            print("Rollover Addition:", previous_revenue_rollover)
-            print("Revenue to Work with:", revenue_for_month + previous_revenue_rollover)
-            print("----------")
-            print(f"Number of Gigs this Month: {gigs_per_month}")
-            total_monthly = 0
-            total_single = 0
-            for entry in monthly_coverages[month]:
-                if len(entry) == 3:
-                    item, cost, type = entry
-                    if type == 'monthly':
-                        total_monthly += cost
-                    elif type == 'single':
-                        total_single += cost
-                    print(f" - {item} (${cost}), {type}")
-                elif len(entry) == 2:
-                    item, value = entry
-                    if item == 'Remaining Revenue':
-                        previous_revenue_rollover = value  # Update rollover for next month
-                        print(f"{item}: ${value}")
+    previous_revenue_rollover = 0
+    for month in sorted(monthly_coverages):
+        report.append(f"\nMonth {month}")
+        revenue_for_month = self.calculate_revenue()[0]
+        report.append(f"Revenue This Month: {revenue_for_month}")
+        report.append(f"Rollover Addition: {previous_revenue_rollover}")
+        report.append(f"Revenue to Work with: {revenue_for_month + previous_revenue_rollover}")
+        report.append("----------")
+        report.append(f"Number of Gigs this Month: {gigs_per_month}")
+        total_monthly = 0
+        total_single = 0
+        for entry in monthly_coverages[month]:
+            if len(entry) == 3:
+                item, cost, type = entry
+                if type == 'monthly':
+                    total_monthly += cost
+                elif type == 'single':
+                    total_single += cost
+                report.append(f" - {item} (${cost}), {type}")
+            elif len(entry) == 2:
+                item, value = entry
+                if item == 'Remaining Revenue':
+                    previous_revenue_rollover = value  # Update rollover for next month
+                    report.append(f"{item}: ${value}")
 
-            print(f"Total Costs Covered: ${total_monthly + total_single}")
-            print(f"\tTotal Monthly Costs Covered: ${total_monthly}")
-            print(f"\tTotal Single Costs Covered: ${total_single}")
+        report.append(f"Total Costs Covered: ${total_monthly + total_single}")
+        report.append(f"\tTotal Monthly Costs Covered: ${total_monthly}")
+        report.append(f"\tTotal Single Costs Covered: ${total_single}")
+
+    return "\n".join(report)
 
 
 
