@@ -146,4 +146,4 @@ calculator = BreakEvenCalculator(cost_items, include_in_calculation, priority_or
 # Display the financial report in a text box
 if st.button('Calculate Break-Even'):
     report = calculator.get_financial_report()
-    st.text_area("Financial Report", value=report, height=300)
+    st.text_area("Financial Report", value=report, height=1000)
