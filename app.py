@@ -65,7 +65,7 @@ class BreakEvenCalculator:
 
         return total_cost_to_break, monthly_revenue * self.months, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month
 
-    def print_financial_report(self):
+    def get_financial_report(self):
         total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month = self.calculate_costs_and_coverage()
         print("Total Cost to Break Even:", total_cost_to_break)
         print("Total Revenue:", total_revenue)
