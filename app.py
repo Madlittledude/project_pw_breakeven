@@ -70,11 +70,11 @@ class BreakEvenCalculator:
         previous_revenue_rollover = 0
         for month in sorted(monthly_coverages):
             revenue_for_month = self.calculate_revenue()[0]
+            report.append("----------")
             report.append(f"\nMonth {month}")
             report.append(f"Revenue This Month: {revenue_for_month}")
             report.append(f"Rollover Addition: {previous_revenue_rollover}")
             report.append(f"Revenue to Work with: {revenue_for_month + previous_revenue_rollover}\n")
-            report.append("----------")
             report.append(f"Number of Gigs this Month: {gigs_per_month}")
             total_monthly = 0
             total_single = 0
@@ -95,6 +95,7 @@ class BreakEvenCalculator:
             report.append(f"\nTotal Costs Covered: ${total_monthly + total_single}")
             report.append(f"\tTotal Monthly Costs Covered: ${total_monthly}")
             report.append(f"\tTotal Single Costs Covered: ${total_single}")
+            report.append("----------")
     
         return "\n".join(report)
 
