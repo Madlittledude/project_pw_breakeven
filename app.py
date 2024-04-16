@@ -128,7 +128,7 @@ def print_financial_report(self):
             elif len(entry) == 2:
                 item, value = entry
                 if item == 'Remaining Revenue':
-                    previous_revenue_rollover = value  # Update rollover for next month
+                    previous_revenue_rollover = value
                     report.append(f"{item}: ${value}")
 
         report.append(f"Total Costs Covered: ${total_monthly + total_single}")
@@ -164,5 +164,6 @@ if st.button('Run Calculation'):
     report_output = calculator.print_financial_report()
     # Display the report in Streamlit
     st.text(report_output)
+
 
    
