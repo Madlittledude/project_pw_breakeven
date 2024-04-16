@@ -180,15 +180,18 @@ def get_single_cost_items(include_in_calculation):
 
 
 def app():
-    priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose','chemicals','storage','insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop']
-#, 'car', 'van'
+    priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose', 'chemicals', 'storage', 'insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop', 'car', 'van']
+
     st.title('Financial Break-Even Analysis Tool')
 
     # Configuration for cost items
     st.sidebar.header('Cost Items Configuration')
     modified_cost_items = {}
-    for item, cost in cost_items.items():
-        modified_cost_items[item] = st.sidebar.number_input(f'Cost for {item}', value=cost, min_value=0)
+    for idx, (item, cost) in enumerate(cost_items.items()):
+        # Using a unique key for each widget
+        widget_key = f"cost_{item}_{idx}"
+        modified_cost_items[item] = st.sidebar.number_input(f'Cost for {item}', value=cost, min_value=0, key=widget_key)
+
 
     # Configuration for priority order
     st.sidebar.header('Adjust Priority Order')
