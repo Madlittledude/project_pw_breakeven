@@ -26,10 +26,12 @@ cost_items = {
     'shoes': 200,
     'hose': 120,
     'laptop': 2200,
-    'car': 5000,
+
     'rent': 2300,
-    'van': 15000,
+ 
 }
+   # 'van': 15000,
+    # 'car': 5000,
 
 include_in_calculation = {
     'gas': (True, 'Monthly'),
@@ -47,11 +49,12 @@ include_in_calculation = {
     'shoes': (True, 'Single'),
     'hose': (True, 'Single'),
     'laptop': (True, 'Single'),
-    'car': (True, 'Single'),
+  
     'rent': (True, 'Monthly'),
-    'van': (True, 'Single'),
+   
 }
-
+ #  'car': (True, 'Single'),
+ # 'van': (True, 'Single'),
 
 
 def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall):
@@ -177,8 +180,8 @@ def get_single_cost_items(include_in_calculation):
 
 
 def app():
-    priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose','chemicals','storage','insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop', 'car', 'van']
-
+    priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose','chemicals','storage','insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop']
+ # 'car', 'van'
     st.title('Financial Break-Even Analysis Tool')
 
     # Configuration for cost items
