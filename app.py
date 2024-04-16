@@ -101,15 +101,16 @@ class BreakEvenCalculator:
         report.append(f"Gig Shortfall: {gig_shortfall:,}\n")
     
         previous_revenue_rollover = 0
+        monthly_revenues, _ = self.calculate_revenue()  # Fetch monthly revenues directly from the revenue calculation method
         for month in sorted(monthly_coverages):
-            revenue_for_month = self.calculate_revenue()[0]
+            revenue_for_month = monthly_revenues[month-1]  # Get revenue for the current month, adjusted for zero-index
             report.append("----------")
             report.append(f"\nMonth {month}")
-            report.append(f"Revenue This Month: {revenue_for_month:,.2f}")
+            report.append(f"Revenue This Month: {revenue_for_month:,.2f}")  # Properly formatted float
             report.append(f"Rollover Addition: {previous_revenue_rollover:,.2f}")
             report.append(f"Revenue to Work with: {revenue_for_month + previous_revenue_rollover:,.2f}\n")
             
-            report.append(f"Number of Gigs this Month: {gigs_per_month[month-1]:,}")
+            report.append(f"Number of Gigs this Month: {gigs_per_month[month-1]:,}")  # Correct index for gigs
             total_monthly = 0
             total_single = 0
             for entry in monthly_coverages[month]:
