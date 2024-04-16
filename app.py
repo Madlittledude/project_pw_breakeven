@@ -59,7 +59,6 @@ include_in_calculation = {
 
 def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month):
     report = []
-    all_single_items = set(item for item, details in include_in_calculation.items() if details[0] and details[1] == 'Single')
     covered_single_items = set()  # Set to keep track of covered single items
 
     report.append("### Executive Financial Summary")
@@ -75,6 +74,7 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
         report.append(f"* Revenue this month: **${monthly_revenue_details[month-1]:,.2f}**")
         report.append(f"* Doors hit this month: **{doors_hit_per_month[month-1]}**")
 
+        # Check monthly items
         for item, cost in monthly_costs.items():
             covered = any(expense[0] == item and expense[2] == month for expense in covered_expenses if expense[3] == 'monthly')
             if covered:
@@ -83,22 +83,18 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
                 shortfall = monthly_shortfall.get(item, (0, ))[0]
                 report.append(f"* Not covered monthly '{item}' (Shortfall: **${shortfall:,.2f}**)")
 
+        # Check single costs, only reporting them the first time they are covered
         for expense in covered_expenses:
-            if expense[2] == month and expense[3] == 'single':
-                covered_single_items.add(expense[0])
+            if expense[2] == month and expense[3] == 'single' and expense[0] not in covered_single_items:
                 report.append(f"* Covered single '{expense[0]}' costing **${expense[1]:,.2f}**")
+                covered_single_items.add(expense[0])  # Mark this item as covered once
 
-    # Remaining single items at the end of all months
-    remaining_single_items = all_single_items - covered_single_items
-    if remaining_single_items:
-        report.append("\n### Remaining Single Items to Purchase")
-        for item in remaining_single_items:
-            report.append(f"* {item} costing **${cost_items[item]:,.2f}** not yet covered")
-
+    # Analysis & Recommendations section
     report.append("\n### Analysis & Recommendations")
     report.append("Recommendation: Increase the number of gigs or optimize cost structures to meet financial targets." if gig_shortfall > 0 else "Financial strategy is on track. Maintain current operations and continue monitoring expenses.")
 
     return "\n".join(report)
+
 
 
 
