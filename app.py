@@ -57,7 +57,7 @@ include_in_calculation = {
  # 'van': (True, 'Single'),
 
 
-def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month):
+def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month, remaining_revenue_each_month):
     report = []
     covered_single_items = set()  # Set to keep track of covered single items
 
@@ -68,13 +68,13 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
     report.append(f"* Projected shortfall of gigs: **{gig_shortfall:,}** (additional gigs needed)" if gig_shortfall > 0 else "Sufficient gigs projected to meet or exceed break-even requirements.")
 
     report.append("\n### Detailed Expense Coverage Report")
+    cumulative_remaining_revenue = 0
     for month in range(1, months + 1):
         report.append("------------")
         report.append(f"\n#### Month {month}:")
         report.append(f"* Revenue this month: **${monthly_revenue_details[month-1]:,.2f}**")
         report.append(f"* Doors hit this month: **{doors_hit_per_month[month-1]}**")
 
-        # Check monthly items
         for item, cost in monthly_costs.items():
             covered = any(expense[0] == item and expense[2] == month for expense in covered_expenses if expense[3] == 'monthly')
             if covered:
@@ -83,17 +83,24 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
                 shortfall = monthly_shortfall.get(item, (0, ))[0]
                 report.append(f"* Not covered monthly '{item}' (Shortfall: **${shortfall:,.2f}**)")
 
-        # Check single costs, only reporting them the first time they are covered
         for expense in covered_expenses:
             if expense[2] == month and expense[3] == 'single' and expense[0] not in covered_single_items:
                 report.append(f"* Covered single '{expense[0]}' costing **${expense[1]:,.2f}**")
                 covered_single_items.add(expense[0])  # Mark this item as covered once
 
-    # Analysis & Recommendations section
+        # Track remaining revenue for each month
+        remaining_revenue = remaining_revenue_each_month[month - 1]
+        cumulative_remaining_revenue += remaining_revenue
+        report.append(f"* Remaining revenue after expenses: **${remaining_revenue:,.2f}**")
+
+    report.append("\n### Cumulative Remaining Revenue")
+    report.append(f"* Total remaining revenue after all expenses over {months} months: **${cumulative_remaining_revenue:,.2f}**")
+
     report.append("\n### Analysis & Recommendations")
     report.append("Recommendation: Increase the number of gigs or optimize cost structures to meet financial targets." if gig_shortfall > 0 else "Financial strategy is on track. Maintain current operations and continue monitoring expenses.")
 
     return "\n".join(report)
+
 
 
 
