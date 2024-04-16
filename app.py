@@ -104,17 +104,15 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
 
 
 
-import math
-
 class BreakEvenCalculator:
     def __init__(self, cost_items, include_in_calculation, priority_order):
         self.cost_items = cost_items
         self.include_in_calculation = include_in_calculation
         self.priority_order = priority_order
-        self.covered_expenses = []
-        self.monthly_shortfall = {}
-        self.monthly_revenue_details = []
-        self.doors_hit_per_month = []
+        self.covered_expenses = []  # Track covered expenses
+        self.monthly_shortfall = {}  # Track shortfalls
+        self.monthly_revenue_details = []  # Revenue per month
+        self.doors_hit_per_month = []  # Doors hit per month
 
     def calculate_monthly_costs(self):
         return {item: self.cost_items[item] for item in self.cost_items if self.include_in_calculation[item][0] and self.include_in_calculation[item][1] == 'Monthly'}
@@ -125,32 +123,28 @@ class BreakEvenCalculator:
     def calculate_monthly_revenue(self, number_of_doors_hit, percentage_of_door_yes, average_price_per_gig):
         number_of_yes = math.ceil((percentage_of_door_yes / 100) * number_of_doors_hit)
         self.doors_hit_per_month.append(number_of_yes)
-        return number_of_yes * average_price_per_gig
+        monthly_revenue = number_of_yes * average_price_per_gig
+        self.monthly_revenue_details.append(monthly_revenue)
+        return monthly_revenue
 
     def simulate_month(self, month, monthly_revenue, monthly_costs, single_costs):
         remaining_revenue = monthly_revenue
-        covered_this_month = []
-        shortfall_this_month = {}
-
+        
         # Handling monthly costs
         for item, cost in monthly_costs.items():
             if remaining_revenue >= cost:
                 remaining_revenue -= cost
-                covered_this_month.append((item, cost, month, 'monthly'))
+                self.covered_expenses.append((item, cost, month, 'monthly'))
             else:
                 shortfall = cost - remaining_revenue
-                shortfall_this_month[item] = shortfall
-                remaining_revenue = 0
+                self.monthly_shortfall[item] = (shortfall, month)
+                remaining_revenue = 0  # This might set to zero prematurely if you prefer to continue attempting to cover other costs.
 
-        # Handling single costs
+        # Handling single costs if not covered yet
         for item in self.priority_order:
             if item in single_costs and remaining_revenue >= single_costs[item] and item not in [expense[0] for expense in self.covered_expenses if expense[3] == 'single']:
                 remaining_revenue -= single_costs[item]
-                covered_this_month.append((item, single_costs[item], month, 'single'))
-
-        self.covered_expenses.extend(covered_this_month)
-        self.monthly_shortfall[month] = shortfall_this_month
-        self.monthly_revenue_details.append(remaining_revenue)
+                self.covered_expenses.append((item, single_costs[item], month, 'single'))
 
         return remaining_revenue
 
@@ -166,17 +160,10 @@ class BreakEvenCalculator:
 
         total_cost_to_break = sum(monthly_costs.values()) * months + sum(single_costs.values()) - sum(single_costs[item] for item in set(expense[0] for expense in self.covered_expenses if expense[3] == 'single'))
         gigs_needed = math.ceil(total_cost_to_break / average_price_per_gig)
-        total_revenue = average_price_per_gig * sum(self.doors_hit_per_month)
+        total_revenue = sum(self.monthly_revenue_details)
         gig_shortfall = gigs_needed - sum(self.doors_hit_per_month)
 
         return total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, self.covered_expenses, months, monthly_costs, self.monthly_shortfall, self.monthly_revenue_details, self.doors_hit_per_month, remaining_revenue_each_month
-
-# Sorted priority order by highest cost
-priority_order = sorted(
-    (item for item in include_in_calculation if include_in_calculation[item][0] and include_in_calculation[item][1] == 'Single'),
-    key=lambda item: cost_items[item],
-    reverse=True
-)
 
 
 
