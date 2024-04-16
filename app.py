@@ -1,11 +1,6 @@
 import streamlit as st
 import json
 import math
-
-import math
-import math
-import math
-
 class BreakEvenCalculator:
     def __init__(self, cost_items, include_in_calculation, priority_order, months=12, average_price_per_gig=300, number_of_doors_hit=120, percentage_of_door_yes=13):
         self.cost_items = cost_items
@@ -100,6 +95,7 @@ class BreakEvenCalculator:
             print(f"Total Costs Covered: ${total_monthly + total_single}")
             print(f"\tTotal Monthly Costs Covered: ${total_monthly}")
             print(f"\tTotal Single Costs Covered: ${total_single}")
+
 
 
 
