@@ -107,38 +107,61 @@ def print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_
 
 
 
+import math
 
-def calculate_break_even(cost_items, include_in_calculation, priority_order, months=1, average_price_per_gig=300, number_of_doors_hit=120, percentage_of_door_yes=13):
-    monthly_revenue_details = []
-    doors_hit_per_month = []
-    remaining_revenue_each_month = []
-    number_of_yes = math.ceil((percentage_of_door_yes / 100) * number_of_doors_hit)
-    monthly_revenue = number_of_yes * average_price_per_gig
+class BreakEvenCalculator:
+    def __init__(self, cost_items, include_in_calculation, priority_order):
+        self.cost_items = cost_items
+        self.include_in_calculation = include_in_calculation
+        self.priority_order = priority_order
+        self.covered_expenses = []  # Track covered expenses
+        self.monthly_shortfall = {}  # Track shortfalls
+        self.monthly_revenue_details = []  # Revenue per month
+        self.doors_hit_per_month = []  # Doors hit per month
 
-    total_monthly_costs = 0
-    covered_expenses = []
-    monthly_shortfall = {}
+    def calculate_monthly_revenue(self, number_of_doors_hit, percentage_of_door_yes, average_price_per_gig):
+        number_of_yes = math.ceil((percentage_of_door_yes / 100) * number_of_doors_hit)
+        self.doors_hit_per_month.append(number_of_yes)
+        return number_of_yes * average_price_per_gig
 
-    for month in range(1, months + 1):
-        current_month_revenue = monthly_revenue
-        month_expenses = 0  # Reset monthly expenses tracker
-
+    def simulate_month(self, month, monthly_revenue, monthly_costs, single_costs):
+        covered_this_month = []
+        shortfall_this_month = {}
         for item, cost in monthly_costs.items():
-            if current_month_revenue >= cost:
-                covered_expenses.append((item, cost, month, 'monthly'))
-                current_month_revenue -= cost
-                month_expenses += cost  # Add to monthly expenses tracker
+            if monthly_revenue >= cost:
+                monthly_revenue -= cost
+                covered_this_month.append((item, cost, month, 'monthly'))
             else:
-                shortfall = cost - current_month_revenue
-                monthly_shortfall[item] = (shortfall, month)
-                current_month_revenue = 0  # Allocate all remaining revenue to this cost
+                shortfall_this_month[item] = cost - monthly_revenue
+                monthly_revenue = 0
 
-        remaining_revenue_each_month.append(current_month_revenue)
-        print(f"Month {month}: Total Expenses = ${month_expenses:.2f}, Remaining Revenue = ${current_month_revenue:.2f}")  # Debug output
+        for item in self.priority_order:
+            if item in single_costs and monthly_revenue >= single_costs[item] and (item, month) not in self.covered_expenses:
+                monthly_revenue -= single_costs[item]
+                covered_this_month.append((item, single_costs[item], month, 'single'))
 
-    # Additional code as needed
+        self.covered_expenses.extend(covered_this_month)
+        self.monthly_shortfall[month] = shortfall_this_month
+        self.monthly_revenue_details.append(monthly_revenue)
+        return monthly_revenue
 
-    return # appropriate return values
+    def calculate_break_even(self, months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes):
+        monthly_costs = self.calculate_monthly_costs()
+        single_costs = self.calculate_single_costs()
+        remaining_revenue_each_month = []
+
+        for month in range(1, months + 1):
+            monthly_revenue = self.calculate_monthly_revenue(number_of_doors_hit, percentage_of_door_yes, average_price_per_gig)
+            remaining_revenue = self.simulate_month(month, monthly_revenue, monthly_costs, single_costs)
+            remaining_revenue_each_month.append(remaining_revenue)
+
+        total_cost_to_break = sum(monthly_costs.values()) * months + sum(single_costs.values()) - sum(single_costs[item] for item in set(expense[0] for expense in self.covered_expenses if expense[3] == 'single'))
+        gigs_needed = math.ceil(total_cost_to_break / average_price_per_gig)
+        total_revenue = average_price_per_gig * sum(self.doors_hit_per_month)
+        gig_shortfall = gigs_needed - sum(self.doors_hit_per_month)
+
+        return total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, self.covered_expenses, months, monthly_costs, self.monthly_shortfall, self.monthly_revenue_details, self.doors_hit_per_month, remaining_revenue_each_month
+
 
 
 
@@ -181,9 +204,16 @@ def get_single_cost_items(include_in_calculation):
 
 
 
+import streamlit as st
+import math
+from your_calculator_module import BreakEvenCalculator  # Adjust the import statement based on your file organization
+
+def calculate_break_even(cost_items, include_in_calculation, priority_order, months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes):
+    calculator = BreakEvenCalculator(cost_items, include_in_calculation, priority_order)
+    return calculator.calculate_break_even(months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes)
+
 def app():
     priority_order = ['gas', 'rent', 'groceries', 'power_washer', 'hose', 'chemicals', 'storage', 'insurance',  'surface_cleaner_attachment', 'x_jet_chem_applier', 'ladder', 'gutter_wand', 'uniforms', 'gloves', 'shoes',  'laptop']
-
     st.title('Financial Break-Even Analysis Tool')
 
     # Configuration for cost items
@@ -210,16 +240,12 @@ def app():
     st.write(f'Number of doors yielded: {doors_yielded}')  # Displaying the number of doors that yielded
 
     if st.button('Calculate Break Even'):
-        # Ensure that the calculate_break_even function is defined or imported appropriately
         results = calculate_break_even(modified_cost_items, include_in_calculation, selected_priority_order, month_scope, estimated_average_price_per_gig, doors, yield_percent)
-        if results:
-            # Ensure that the print_financial_report function is defined or imported appropriately
-            report = print_financial_report(*results)
-            st.markdown(report, unsafe_allow_html=True)
-            # Verify clients count
-            st.write(f"Based on the calculations, you will have {doors_yielded * month_scope} clients over {month_scope} months.")
-        else:
-            st.error("Error in calculation.")
+        total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month, remaining_revenue_each_month = results
+        report = print_financial_report(total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, months, monthly_costs, monthly_shortfall, monthly_revenue_details, doors_hit_per_month, remaining_revenue_each_month)
+        st.markdown(report, unsafe_allow_html=True)
+        # Verify clients count
+        st.write(f"Based on the calculations, you will have {doors_yielded * month_scope} clients over {month_scope} months.")
 
     # Display history of runs
     if 'history' in st.session_state and st.session_state['history']:
@@ -228,5 +254,6 @@ def app():
 
 if __name__ == "__main__":
     app()
+
 
 
