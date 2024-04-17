@@ -24,15 +24,16 @@ class BreakEvenCalculator:
         revenues = []
         gigs_per_month = []
         current_doors_hit = self.number_of_doors_hit
-        
+    
         for month in range(1, self.months + 1):
             number_of_yes = math.ceil((self.percentage_of_door_yes / 100) * current_doors_hit)
             monthly_revenue = number_of_yes * self.average_price_per_gig
             revenues.append(monthly_revenue)
             gigs_per_month.append(number_of_yes)
-            current_doors_hit *= (1 + self.monthly_growth_rate)  # Increase by growth rate
-            
+            current_doors_hit = math.ceil(current_doors_hit * (1 + self.monthly_growth_rate))  # Apply growth rate and round
+    
         return revenues, gigs_per_month
+
 
     def calculate_costs_and_coverage(self):
         total_monthly_costs = sum(self.monthly_costs.values()) * self.months
@@ -175,14 +176,11 @@ cost_items = json.loads(cost_items_input)
 include_in_calculation = json.loads(include_in_calculation_input)
 
 
-monthly_growth_rate = st.slider("Monthly growth rate (%):", min_value=0.0, max_value=10.0, value=0.0, step=0.1)
-monthly_growth_rate /= 100  # Convert percentage to decimal
-
+monthly_growth_rate = st.slider("Monthly growth rate (%):", min_value=0, max_value=50, value=0, step=1)
+monthly_growth_rate /= 100.0  # Convert percentage to decimal
 # Initialize the calculator with the user input
 calculator = BreakEvenCalculator(cost_items, include_in_calculation, priority_order, months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes, monthly_growth_rate)
 
-# Initialize the calculator with the user input
-calculator = BreakEvenCalculator(cost_items, include_in_calculation, priority_order, months, average_price_per_gig, number_of_doors_hit, percentage_of_door_yes)
 
 
 # Display the financial report in a text box
