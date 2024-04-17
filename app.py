@@ -13,30 +13,29 @@ class BreakEvenCalculator:
         self.number_of_doors_hit = number_of_doors_hit
         self.percentage_of_door_yes = percentage_of_door_yes
         self.monthly_growth_rate = monthly_growth_rate / 100  # Convert percentage to decimal
+        self.current_gigs = math.ceil((self.percentage_of_door_yes / 100) * self.number_of_doors_hit)  # Initial gig count
         self.initialize_costs()
+        self.revenues = []
+        self.gigs_per_month = []
 
     def initialize_costs(self):
         self.monthly_costs = {item: self.cost_items[item] for item, (included, frequency) in self.include_in_calculation.items() if included and frequency == 'Monthly'}
         self.single_costs = {item: self.cost_items[item] for item in self.priority_order if item in self.cost_items and self.include_in_calculation[item][0] and self.include_in_calculation[item][1] == 'Single'}
         self.covered_single_costs = set()
 
-    def calculate_revenue(self):
-        revenues = []
-        gigs_per_month = []
-        current_gigs = math.ceil((self.percentage_of_door_yes / 100) * self.number_of_doors_hit)  # Initial gig count
-    
-        for month in range(1, self.months + 1):
-            monthly_revenue = current_gigs * self.average_price_per_gig
-            revenues.append(monthly_revenue)
-            gigs_per_month.append(current_gigs)
-    
-            # Apply the growth rate to the gig count for the next month, more aggressively handle rounding
-            current_gigs = current_gigs * (1 + self.monthly_growth_rate)
-            current_gigs = math.ceil(current_gigs)  # Move rounding to after applying growth
-            print('Current.........',current_gigs)
-    
-        return revenues, gigs_per_month
-    
+
+
+    def calculate_revenue(self, month):
+        # Calculate revenue for the current month based on gigs already computed
+        monthly_revenue = self.current_gigs * self.average_price_per_gig
+        self.revenues.append(monthly_revenue)
+        self.gigs_per_month.append(self.current_gigs)
+        
+        # Only update gig count for the next month if it is not the last month
+        if month < self.months:
+            self.current_gigs = math.ceil(self.current_gigs * (1 + self.monthly_growth_rate))
+
+        return monthly_revenue, self.current_gigs
     
         
 
