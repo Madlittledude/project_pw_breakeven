@@ -23,23 +23,18 @@ class BreakEvenCalculator:
     def calculate_revenue(self):
         revenues = []
         gigs_per_month = []
-        current_doors_hit = self.number_of_doors_hit
+        current_gigs = math.ceil((self.percentage_of_door_yes / 100) * self.number_of_doors_hit)  # Initial gig count
     
         for month in range(1, self.months + 1):
-            number_of_yes = math.ceil((self.percentage_of_door_yes / 100) * current_doors_hit)
-            monthly_revenue = number_of_yes * self.average_price_per_gig
+            monthly_revenue = current_gigs * self.average_price_per_gig
             revenues.append(monthly_revenue)
-            gigs_per_month.append(number_of_yes)
+            gigs_per_month.append(current_gigs)
     
-            # Update the number of doors hit for the next month
-            current_doors_hit *= (1 + self.monthly_growth_rate)  # Increase by the growth rate
-            current_doors_hit = math.ceil(current_doors_hit)  # Round to the nearest whole number
-            
-            # Apply the growth rate directly to the number of gigs (number_of_yes)
-            if month < self.months:  # Only apply growth if there are more months to process
-                number_of_yes = math.ceil(number_of_yes * (1 + self.monthly_growth_rate))
-        
+            # Apply the growth rate to the gig count for the next month
+            current_gigs = math.ceil(current_gigs * (1 + self.monthly_growth_rate))
+    
         return revenues, gigs_per_month
+
     
 
 
@@ -103,26 +98,24 @@ class BreakEvenCalculator:
     def get_financial_report(self):
         report = []
         total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month_list = self.calculate_costs_and_coverage()
-    
-        # Format numbers with commas
+        
+        # Format numbers with commas for total financial summary
         report.append(f"Total Cost to Break Even: {total_cost_to_break:,.2f}")
         report.append(f"Total Revenue: {total_revenue:,.2f}")
         report.append(f"Gigs Needed: {gigs_needed:,}")
         report.append(f"Gig Shortfall: {gig_shortfall:,}\n")
     
-        monthly_revenues, _ = self.calculate_revenue()  # Fetch monthly revenues directly from the revenue calculation method
         previous_revenue_rollover = 0
         for month in sorted(monthly_coverages):
-            revenue_for_month = monthly_revenues[month-1]  # Get revenue for the current month, adjusted for zero-index
-            gigs_this_month = gigs_per_month_list[month-1]  # Correctly fetch the gigs for the current month
-            
+            revenue_for_month = self.calculate_revenue()[0][month-1]  # Fetch monthly revenues correctly
+            gigs_this_month = gigs_per_month_list[month-1]  # Fetch the correct number of gigs per month
+    
             report.append("----------")
             report.append(f"\nMonth {month}")
-            report.append(f"Revenue This Month: {revenue_for_month:,.2f}")  # Properly formatted float
+            report.append(f"Revenue This Month: {revenue_for_month:,.2f}")
             report.append(f"Rollover Addition: {previous_revenue_rollover:,.2f}")
             report.append(f"Revenue to Work with: {revenue_for_month + previous_revenue_rollover:,.2f}\n")
-            
-            report.append(f"Number of Gigs this Month: {gigs_this_month:,}")  # Display gigs correctly
+            report.append(f"Number of Gigs this Month: {gigs_this_month:,}")
     
             total_monthly = 0
             total_single = 0
@@ -147,6 +140,7 @@ class BreakEvenCalculator:
             report.append("----------")
     
         return "\n".join(report)
+
 
 
 # Example usage:
