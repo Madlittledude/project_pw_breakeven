@@ -30,10 +30,13 @@ class BreakEvenCalculator:
             monthly_revenue = number_of_yes * self.average_price_per_gig
             revenues.append(monthly_revenue)
             gigs_per_month.append(number_of_yes)
-            # Update the number of doors hit for the next month based on growth rate
-            current_doors_hit = round(current_doors_hit * (1 + self.monthly_growth_rate))
+            
+            # Update the number of doors hit for the next month
+            current_doors_hit *= (1 + self.monthly_growth_rate)  # Increase by the growth rate
+            current_doors_hit = math.ceil(current_doors_hit)  # Round to the nearest whole number
     
         return revenues, gigs_per_month
+
 
 
 
