@@ -33,6 +33,7 @@ class BreakEvenCalculator:
             # Apply the growth rate to the gig count for the next month, more aggressively handle rounding
             current_gigs = current_gigs * (1 + self.monthly_growth_rate)
             current_gigs = math.ceil(current_gigs)  # Move rounding to after applying growth
+            print('Current.........',current_gigs)
     
         return revenues, gigs_per_month
     
