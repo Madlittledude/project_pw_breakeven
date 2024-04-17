@@ -31,11 +31,16 @@ class BreakEvenCalculator:
             revenues.append(monthly_revenue)
             gigs_per_month.append(number_of_yes)
     
-            # Apply growth rate for the next month's calculation
+            # Update the number of doors hit for the next month
             current_doors_hit *= (1 + self.monthly_growth_rate)  # Increase by the growth rate
-            current_doors_hit = math.ceil(current_doors_hit)  # Ensure the number of doors hit is rounded up
-    
+            current_doors_hit = math.ceil(current_doors_hit)  # Round to the nearest whole number
+            
+            # Apply the growth rate directly to the number of gigs (number_of_yes)
+            if month < self.months:  # Only apply growth if there are more months to process
+                number_of_yes = math.ceil(number_of_yes * (1 + self.monthly_growth_rate))
+        
         return revenues, gigs_per_month
+    
 
 
 
