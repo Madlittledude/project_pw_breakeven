@@ -30,9 +30,11 @@ class BreakEvenCalculator:
             monthly_revenue = number_of_yes * self.average_price_per_gig
             revenues.append(monthly_revenue)
             gigs_per_month.append(number_of_yes)
-            current_doors_hit = math.ceil(current_doors_hit * (1 + self.monthly_growth_rate))  # Apply growth rate and round
+            # Update the number of doors hit for the next month based on growth rate
+            current_doors_hit = round(current_doors_hit * (1 + self.monthly_growth_rate))
     
         return revenues, gigs_per_month
+
 
 
     def calculate_costs_and_coverage(self):
