@@ -97,7 +97,7 @@ class BreakEvenCalculator:
 
     def get_financial_report(self):
         report = []
-        total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month = self.calculate_costs_and_coverage()
+        total_cost_to_break, total_revenue, gigs_needed, gig_shortfall, covered_expenses, monthly_coverages, gigs_per_month_list = self.calculate_costs_and_coverage()
     
         # Format numbers with commas
         report.append(f"Total Cost to Break Even: {total_cost_to_break:,.2f}")
@@ -105,17 +105,20 @@ class BreakEvenCalculator:
         report.append(f"Gigs Needed: {gigs_needed:,}")
         report.append(f"Gig Shortfall: {gig_shortfall:,}\n")
     
-        previous_revenue_rollover = 0
         monthly_revenues, _ = self.calculate_revenue()  # Fetch monthly revenues directly from the revenue calculation method
+        previous_revenue_rollover = 0
         for month in sorted(monthly_coverages):
             revenue_for_month = monthly_revenues[month-1]  # Get revenue for the current month, adjusted for zero-index
+            gigs_this_month = gigs_per_month_list[month-1]  # Correctly fetch the gigs for the current month
+            
             report.append("----------")
             report.append(f"\nMonth {month}")
             report.append(f"Revenue This Month: {revenue_for_month:,.2f}")  # Properly formatted float
             report.append(f"Rollover Addition: {previous_revenue_rollover:,.2f}")
             report.append(f"Revenue to Work with: {revenue_for_month + previous_revenue_rollover:,.2f}\n")
             
-            report.append(f"Number of Gigs this Month: {gigs_per_month[month-1]:,}")  # Correct index for gigs
+            report.append(f"Number of Gigs this Month: {gigs_this_month:,}")  # Display gigs correctly
+    
             total_monthly = 0
             total_single = 0
             for entry in monthly_coverages[month]:
